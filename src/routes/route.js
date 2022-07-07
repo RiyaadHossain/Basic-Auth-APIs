@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 
 router.post("/signup", async (req, res) => {
   try {
+
     // Check weather the email is exist or not
     const email = req.body.email;
     const personExist = await PersonModel.findOne({ email });
@@ -16,7 +17,13 @@ router.post("/signup", async (req, res) => {
     // Create New Person
     if (req.body.password === req.body.confirmPassword) {
       const newPerson = new PersonModel(req.body);
+      
+      // Generate Token using Instance Method
+      const token = await newPerson.generateToken()
+      console.log(token);
+      
       const personCreated = await newPerson.save();
+
       return res.status(200).json(personCreated);
     } else {
       return res.status(200).json({ message: "Password didn't match" });
@@ -32,7 +39,7 @@ router.post("/signin", async (req, res) => {
     const password = req.body.password;
     const personInfo = await PersonModel.findOne({ email });
 
-    const passMatched = await bcrypt.compare(password, personInfo.password)
+    const passMatched = await bcrypt.compare(password, personInfo.password) // Compare the password by bcrypt
 
     if (passMatched) {
       return res.status(200).json({ message: "Person Log in Successfully" });
