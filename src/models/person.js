@@ -27,7 +27,6 @@ const PersonSchema = mongoose.Schema({
   },
   confirmPassword: {
     type: String,
-    required: true,
     min: [6, "Password length should be at least 6"],
   },
   tokens: [
@@ -51,8 +50,7 @@ PersonSchema.methods.generateToken = async function () {
     const token = jwt.sign({ _id: this._id.toString() }, process.env.JWT_SECRET_TOKEN);
     this.tokens = await this.tokens.concat({token}) // Add the tokens in the Schema
     await this.save() // Save the Tokens Info
-    return token;
-
+    return token
   } catch (error) {
     
     res.send(error);
@@ -60,10 +58,10 @@ PersonSchema.methods.generateToken = async function () {
 };
 
 // Hashed the Password Before the Save Method
-PersonSchema.pre("save", async function (next) {
+PersonSchema.pre("save", function (next) {
   if (this.isModified("password")) {
     this.password = bcrypt.hash(this.password, 10);
-    this.confirmPassword = bcrypt.hash(this.password, 10);
+    this.confirmPassword = undefined;
   }
   next();
 });
